@@ -1,29 +1,36 @@
-name: Jalankan Downloader
+name: GESIT-Engine
 
 on:
   workflow_dispatch:
     inputs:
       video_url:
-        description: 'Tempel Link Video Di Sini'
+        description: 'Tempel Link Video ke GESIT'
         required: true
 
 jobs:
-  proses-unduh:
+  proses-gesit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install Python
-        uses: actions/setup-python@v4
+      - name: Ambil Kode
+        uses: actions/checkout@v4 # Gunakan v4 yang terbaru
+
+      - name: Siapkan Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
       - name: Install Modul
         run: pip install requests
-      - name: Eksekusi Download
+
+      - name: Jalankan GESIT
         run: python download.py
         env:
           VIDEO_URL: ${{ github.event.inputs.video_url }}
-      - name: Simpan Hasilnya
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Simpan Hasil di GitHub (Opsional)
         uses: actions/upload-artifact@v4
         with:
-          name: Video-Saya
-          path: video_hasil.mp4
+          name: Hasil-Download-GESIT
+          path: GESIT_VIDEO.mp4
