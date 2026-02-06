@@ -23,7 +23,7 @@ jobs:
         env:
           VIDEO_URL: ${{ github.event.inputs.video_url }}
       - name: Simpan Hasilnya
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Video-Saya
           path: video_hasil.mp4
