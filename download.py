@@ -1,43 +1,34 @@
 import requests
 import os
-import time
 
-# Mengambil link dari input GitHub Actions
-url = os.getenv("VIDEO_URL")
-nama_file = "GESIT_DOWNLOAD.mp4"
+URL = os.getenv("VIDEO_URL")
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+FILE_NAME = "GESIT_VIDEO.mp4"
 
-def unduh_gesit():
-    print("=========================================")
-    print("🚀 GESIT: Downloader Super Cepat Dimulai")
-    print("=========================================")
-    print(f"🔗 Sumber: {url}")
+def kirim_ke_telegram():
+    print("📤 Mengirim ke Telegram...")
+    url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+    with open(FILE_NAME, 'rb') as f:
+        # Menambahkan caption agar terlihat rapi
+        payload = {'chat_id': CHAT_ID, 'caption': '🚀 File GESIT sudah mendarat!'}
+        files = {'document': f}
+        r = requests.post(url, data=payload, files=files)
     
-    start_time = time.time()
-    
-    try:
-        with requests.get(url, stream=True) as r:
-            r.raise_for_status()
-            total_size = int(r.headers.get('content-length', 0))
-            
-            with open(nama_file, 'wb') as f:
-                downloaded = 0
-                for chunk in r.iter_content(chunk_size=1024*1024): # Potongan 1MB
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        # Log sederhana agar kita tahu proses berjalan
-                        if total_size > 0:
-                            done = int(50 * downloaded / total_size)
-                            print(f"\r📦 Progress: [{'=' * done}{' ' * (50-done)}] {downloaded//(1024*1024)}MB", end="")
-            
-        end_time = time.time()
-        print(f"\n\n✅ GESIT Selesai dalam {round(end_time - start_time, 2)} detik!")
-        
-    except Exception as e:
-        print(f"\n❌ Gagal mengunduh: {e}")
+    if r.status_code == 200:
+        print("✅ Berhasil dikirim ke Telegram!")
+    else:
+        print(f"❌ Gagal: {r.text}")
+
+def download():
+    print(f"📥 GESIT sedang menarik file...")
+    with requests.get(URL, stream=True) as r:
+        r.raise_for_status()
+        with open(FILE_NAME, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024*1024):
+                f.write(chunk)
+    print("✅ Download Selesai.")
+    kirim_ke_telegram()
 
 if __name__ == "__main__":
-    if url:
-        unduh_gesit()
-    else:
-        print("❌ Error: Link tidak ditemukan di sistem GESIT!")
+    download()
