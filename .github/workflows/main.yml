@@ -1,0 +1,29 @@
+name: Jalankan Downloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'Tempel Link Video Di Sini'
+        required: true
+
+jobs:
+  proses-unduh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install Modul
+        run: pip install requests
+      - name: Eksekusi Download
+        run: python download.py
+        env:
+          VIDEO_URL: ${{ github.event.inputs.video_url }}
+      - name: Simpan Hasilnya
+        uses: actions/upload-artifact@v3
+        with:
+          name: Video-Saya
+          path: video_hasil.mp4
