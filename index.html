@@ -3,58 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GESIT - Downloader</title>
+    <title>GESIT - Remote Panel</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; }
         h1 { color: #38bdf8; margin-bottom: 0.5rem; letter-spacing: 2px; }
-        p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
         input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 0.5rem; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 0.75rem; background: #0284c7; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #0369a1; }
-        #status { margin-top: 1rem; font-size: 0.8rem; color: #fbbf24; }
+        button { width: 100%; padding: 0.75rem; background: #0284c7; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #475569; cursor: not- his-allowed; }
+        #status { margin-top: 1rem; font-size: 0.8rem; color: #fbbf24; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>🚀 GESIT</h1>
-    <p>Generate Super-fast Intelligent Transfer</p>
-    <input type="text" id="videoUrl" placeholder="Tempel link video di sini...">
-    <button onclick="panggilGesit()">AKTIFKAN MESIN</button>
-    <div id="status"></div>
+    <p style="color: #94a3b8; font-size: 0.8rem;">Cloud Downloader Remote</p>
+    
+    <input type="password" id="ghToken" placeholder="Masukkan Token GHP kamu...">
+    <input type="text" id="videoUrl" placeholder="Tempel link video .mp4...">
+    
+    <button id="btnAktif" onclick="panggilGesit()">AKTIFKAN MESIN</button>
+    
+    <div id="status">Status: Standby</div>
 </div>
 
 <script>
 async function panggilGesit() {
+    const token = document.getElementById('ghToken').value;
     const url = document.getElementById('videoUrl').value;
     const status = document.getElementById('status');
-    
-    // GANTI BAGIAN INI DENGAN DATA KAMU
-    const USERNAME = "gigamovie";
-    const REPO = "GESIT";
-    const TOKEN = "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";
+    const btn = document.getElementById('btnAktif');
 
-    if(!url) return alert("Link kosong!");
+    // KONFIGURASI GESIT KAMU
+    const USERNAME = "gigamovie"; // <--- Ganti dengan Username GitHub kamu
+    const REPO = "GESIT"; 
 
-    status.innerText = "⏳ Menghubungi Server GitHub...";
+    if(!token || !url) return alert("Token dan URL harus diisi!");
 
-    const res = await fetch(`https://api.github.com/repos/${USERNAME}/${REPO}/actions/workflows/main.yml/dispatches`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${TOKEN}`,
-            'Accept': 'application/vnd.github+json',
-        },
-        body: JSON.stringify({
-            ref: 'main', 
-            inputs: { video_url: url }
-        })
-    });
+    status.innerText = "⏳ Sedang memerintahkan GitHub...";
+    btn.disabled = true;
 
-    if(res.ok) {
-        status.innerText = "✅ GESIT Berhasil Dinyalakan! Cek tab Actions di GitHub untuk melihat progress.";
-    } else {
-        status.innerText = "❌ Gagal. Cek Token atau Username kamu.";
+    try {
+        const res = await fetch(`https://api.github.com/repos/${USERNAME}/${REPO}/actions/workflows/main.yml/dispatches`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+            },
+            body: JSON.stringify({
+                ref: 'main', 
+                inputs: { video_url: url }
+            })
+        });
+
+        if(res.ok) {
+            status.innerHTML = "✅ **BERHASIL!**<br>Mesin GESIT sudah menyala. Silakan tutup halaman ini dan tunggu video di Telegram.";
+            document.getElementById('videoUrl').value = "";
+        } else {
+            status.innerText = "❌ Gagal: Pastikan Token benar dan Workflow sudah ada.";
+        }
+    } catch (err) {
+        status.innerText = "❌ Terjadi kesalahan koneksi.";
+    } finally {
+        btn.disabled = false;
     }
 }
 </script>
