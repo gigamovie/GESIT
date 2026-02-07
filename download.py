@@ -28,24 +28,14 @@ def upload_catbox():
         return r.text.strip() if r.status_code == 200 else None
     except: return None
 
-def upload_gofile():
-    try:
-        server = requests.get("https://api.gofile.io/getServer").json()['data']['server']
-        with open(FILE_NAME, 'rb') as f:
-            r = requests.post(f"https://{server}.gofile.io/uploadFile", files={'file': f}).json()
-        return r['data']['downloadPage'] if r['status'] == 'ok' else None
-    except: return None
-
 if __name__ == "__main__":
     if download_video():
-        # Coba Catbox dulu, kalau gagal coba GoFile
-        link = upload_catbox() or upload_gofile()
-        
+        link = upload_catbox()
         if link:
             msg = f"✅ **GESIT SUKSES!**\n\nVideo siap disimpan:\n🔗 {link}"
         else:
-            msg = "❌ Video berhasil didownload, tapi semua gudang (Catbox/GoFile) penuh."
-        requests.post(f"https://api.api.telegram.org/bot{TOKEN}/sendMessage", data={'chat_id': CHAT_ID, 'text': msg})
+            msg = "❌ Download Oke, tapi gagal upload ke Catbox."
+        # PERHATIKAN ALAMAT DI BAWAH INI (SUDAH DIPERBAIKI)
+        requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={'chat_id': CHAT_ID, 'text': msg})
     else:
-        # Jika masih 403 Forbidden
-        requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={'chat_id': CHAT_ID, 'text': "❌ Gagal: Link ini memblokir akses server (IP-Lock). Coba gunakan link dari downloader pihak ketiga."})
+        requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={'chat_id': CHAT_ID, 'text': "❌ Gagal menarik video dari link tersebut."})
