@@ -1,36 +1,40 @@
-name: GESIT-Engine
+name: MESIN GESIT TURBO
 
 on:
   workflow_dispatch:
     inputs:
       video_url:
-        description: 'Tempel Link Video ke GESIT'
+        description: 'Tempel Link Video di Sini'
         required: true
+        default: ''
 
 jobs:
   proses-gesit:
     runs-on: ubuntu-latest
-    steps:
-      - name: Ambil Kode
-        uses: actions/checkout@v4 # Gunakan v4 yang terbaru
 
-      - name: Siapkan Python
+    steps:
+      # 1. Mengambil kode dari repositori kamu
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Python versi terbaru
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Install Modul
-        run: pip install requests
+      # 3. Install Alat Tempur (Aria2 untuk Speed, yt-dlp untuk Inspeksi)
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y aria2
+          pip install requests yt-dlp
 
-      - name: Jalankan GESIT
-        run: python download.py
+      # 4. Jalankan Skrip Download
+      - name: Menjalankan Mesin GESIT
         env:
+          # Mengambil data dari input Web dan Secrets GitHub
           VIDEO_URL: ${{ github.event.inputs.video_url }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
-      - name: Simpan Hasil di GitHub (Opsional)
-        uses: actions/upload-artifact@v4
-        with:
-          name: Hasil-Download-GESIT
-          path: GESIT_VIDEO.mp4
+        run: python download.py
